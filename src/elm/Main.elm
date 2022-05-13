@@ -20,6 +20,12 @@ type alias Model =
  -- , direction : Key
   }
 
+type alias Snake =
+  {
+    dir : direction
+    , body : List Point
+  }
+
 init : Flags -> ( Model, Cmd Msg )
 init { now } =
   now
@@ -33,6 +39,23 @@ type Msg
   | ToggleGameLoop
   | KeyDown Key
 
+game_trs : Model -> List Html
+game_trs model =
+    List.map
+        ( game_tr model )
+        [1..model.size.height]
+
+type Action = Tick Time | KeyPress KeyCode
+
+update : Action -> Model -> ( Model, Effects Action)
+update action model = 
+  case action of 
+    Tick now ->
+      ( frame model now, Effects.tick Tick)
+
+    KeyPress key ->
+      ( process_key model key, Effects.none )
+
 {-| Manage all your updates here, from the main update function to each
  -|   subfunction. You can use the helpers in Update.elm to help construct
  -|   Cmds. -}
@@ -42,6 +65,27 @@ updateSquare ({ coloredSquare } as model) =
   coloredSquare + 1
   |> modBy 1600
   |> Setters.setColoredSquareIn model
+
+grow_snake : List Point -> List Point
+grow_snake body = body ++ repeat 10 ( Point 0 0 )
+
+eat_apple : Model -> Model
+eat_apple model =
+    case List.head model.snake.body of
+        Nothing -> model -- Snake is empty won't happen
+        Just h ->
+            if h == model.eat_apple
+               then 
+                   let ( apple_pos, seed ) =
+                       new_apple_position model.random_seed world_s
+                   in
+                   {
+                       model |
+                           snake       <- grow_snake model.snake,
+                           apple       <- apple_pos,
+                           random_seed <- seed
+                   }
+              else model
 
 toggleGameLoop : Model -> ( Model, Cmd Msg )
 toggleGameLoop ({ gameStarted } as model) =
