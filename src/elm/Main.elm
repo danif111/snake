@@ -344,6 +344,7 @@ explanations ({ gameStarted, wall, isObstacles } as model) =
      say = if wall then "Disable" else "Activate"
      write = if isObstacles then "Remove" else "Add"
      classWall = if gameStarted then "btn hide" else "btn"
+     size = if gameStarted then "hide" else ""
   in
   Html.div [ Attributes.class "separator" ]
     [ Html.h1 []
@@ -360,7 +361,7 @@ explanations ({ gameStarted, wall, isObstacles } as model) =
       [ Events.onClick ToggleObstacle, Attributes.class classWall]
       [ Html.text (String.join " " [write, "obstacle"]) ]
     , Html.input 
-      [ Events.onInput OnInput, Attributes.value model.gridSize ] []
+      [ Events.onInput OnInput, Attributes.value model.gridSize, Attributes.class size] []
     ]
 
 {-| Main view functions, composing all functions in one -}
