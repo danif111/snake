@@ -37,15 +37,18 @@ type alias Snake =
     , body : List Point
   }
 initGame : state -> Int -> (Model, Cmd Msg)
-initGame initialState highSQCORE +
+initGame initialState highScore =
   let
      head = computeGridCenter gridSize
      initSnake = NonEmptyList head (List.repeat (initialSnakeLength - 1) head)
   in
-  ( { gameTicks = 0
+  ( { state = initialState
+      , gameTicks = 0
       , direction = Update
       , prize = Nothing
       , score = 0
+      , snake = initSnake
+      , highScore = highScore
       }
       , if (initialState == Active) then placePrize initSnake else Cmd.none
       )
@@ -59,8 +62,8 @@ init { now } =
   -- UPDATE
   type Msg = Tick Time.posix | PlacePrize (Maybe Position) | PointerDownAt (Float, folat )
 
-  update : Msg ->Model -> (Model, Cmd Msg)
-  update msg model =
+update : Msg ->Model -> (Model, Cmd Msg)
+update msg model =
     if (model.state == Active) then
       case msg of
        PointerDownAt offsetPos ->
